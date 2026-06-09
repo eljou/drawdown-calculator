@@ -1,0 +1,43 @@
+.summary-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+    .summary-stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.stat-box {
+    background-color: var(--bg-main);
+    padding: 1rem;
+    border-radius: var(--radius);
+    border-left: 4px solid var(--border-color);
+}
+.stat-box.neutral {
+    border-left-color: var(--accent-primary);
+}
+.stat-box.profit {
+    border-left-color: var(--crypto-green);
+}
+.stat-box.drawdown {
+    border-left-color: var(--crypto-red);
+}
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.stat-label-title {
+    font-size: 0.85rem;
+    color: var(--text-main);
+}
+.stat-value {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-top: 0.25rem;
+    white-space: nowrap;
+}

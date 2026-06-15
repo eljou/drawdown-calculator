@@ -2,33 +2,23 @@ import type { Account } from "./account";
 import type { MarketSymbol } from "./market-symbol";
 import type { Order, ResumedOrder } from "./order";
 
-const getOrderPnL = (order: Order, symbol: MarketSymbol, total = true) => {
-  const priceLimit =
-    total === true
-      ? order.type === "buy"
-        ? symbol.longsStop
-        : symbol.shortsStop
-      : symbol.currentPrice;
+const getPnl = (order: Order, priceLimit: number) => order.lots * (priceLimit - order.openPrice);
+const getCurrentPnl = (order: Order, symbol: MarketSymbol) =>
+  order.symbol === symbol?.ticker ? getPnl(order, symbol.currentPrice) : 0;
+const getTotalPnl = (order: Order, symbol: MarketSymbol) =>
+  order.symbol === symbol?.ticker ? getPnl(order, order.type === "buy" ? symbol.longsStop : symbol.shortsStop) : 0;
 
-  if (order.symbol === symbol.ticker)
-    return order.lots * (priceLimit - order.openPrice);
-
-  return 0;
-};
-
-export const getOrderResume = (
-  order: Order,
-  symbol: MarketSymbol,
-): ResumedOrder => {
-  const totalPnL = getOrderPnL(order, symbol);
-  const currentPnL = getOrderPnL(order, symbol, false);
+export const getOrderResume = (order: Order, symbol: MarketSymbol): ResumedOrder => {
+  const currentPnL = getCurrentPnl(order, symbol);
+  const totalPnL = getTotalPnl(order, symbol);
   return { ...order, totalPnL, currentPnL };
 };
 
-export const removeOrder = (
-  id: string,
-  orders: ResumedOrder[],
-): ResumedOrder[] => orders.filter((o) => o.id !== id);
+export const addOrder = (order: Order, symbolConfig: MarketSymbol, prevOrders: ResumedOrder[]): ResumedOrder[] => [
+  getOrderResume(order, symbolConfig),
+  ...prevOrders,
+];
+export const removeOrder = (id: string, orders: ResumedOrder[]): ResumedOrder[] => orders.filter((o) => o.id !== id);
 
 export const createAccount = (balance: number): Account => ({
   balance,
@@ -73,10 +63,7 @@ export type AccountMetrics = {
   exposition: Record<string, number>;
   rescueCapital: number;
 };
-export const getAccountResume = (
-  account: Account,
-  orders: Order[],
-): AccountMetrics => {
+export const getAccountResume = (account: Account, orders: Order[]): AccountMetrics => {
   const expositionBySymbol = orders.reduce<Record<string, number>>(
     (acc, o) => ({ ...acc, [o.symbol]: (acc[o.symbol] ?? 0) + o.lots }),
     {},
@@ -86,8 +73,7 @@ export const getAccountResume = (
     orders,
     equity: account.equity,
     totalEquity: account.totalEquity,
-    rescueCapital:
-      account.totalEquity < 0 ? Math.abs(account.totalEquity) + 500 : 0,
+    rescueCapital: account.totalEquity < 0 ? Math.abs(account.totalEquity) + 500 : 0,
     pnl: account.pnl,
     drawdown: (Math.abs(account.pnl) / account.balance) * 100,
     stopLossPnL: account.totalPnL,
@@ -104,9 +90,7 @@ export function addEstimatedOrders(
 ): ResumedOrder[] {
   if (orders.length === 0) return [];
 
-  const sortedByPrice = orders
-    .filter((o) => o.symbol === symbol.ticker)
-    .sort((a, b) => a.openPrice - b.openPrice);
+  const sortedByPrice = orders.filter((o) => o.symbol === symbol.ticker).sort((a, b) => a.openPrice - b.openPrice);
   const minPrice = sortedByPrice[0].openPrice;
 
   const remainingPriceGap = minPrice - symbol.longsStop;

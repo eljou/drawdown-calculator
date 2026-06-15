@@ -6,9 +6,7 @@ import InputNumber from "../basics/number-input";
 const getOrdersAvgDelta = (orders: ResumedOrder[], ticker: string) => {
   if (orders.length === 0) return 0;
 
-  const sortedByPrice = orders
-    .filter((o) => o.symbol === ticker)
-    .sort((a, b) => a.openPrice - b.openPrice);
+  const sortedByPrice = orders.filter((o) => o.symbol === ticker).sort((a, b) => a.openPrice - b.openPrice);
 
   const minPrice = sortedByPrice[0].openPrice;
   const maxPrice = sortedByPrice[sortedByPrice.length - 1].openPrice;
@@ -33,22 +31,11 @@ export default function AddDummyOrders({
   return (
     <div className="card" style={{ padding: "0.5rem" }}>
       <b>Agregar ordenes estimadas</b>
-      <div
-        className="label-row"
-        style={{ padding: "0.2rem", marginBottom: 0, alignItems: "flex-start" }}
-      >
-        <div
-          className="form-group"
-          style={{ marginRight: 20, marginBottom: 0 }}
-        >
+      <div className="label-row" style={{ padding: "0.2rem", marginBottom: 0, alignItems: "flex-start" }}>
+        <div className="form-group" style={{ marginRight: 20, marginBottom: 0 }}>
           <label htmlFor="symbol">Símbolo / Activo</label>
           <div className="input-wrapper">
-            <select
-              id="symbol"
-              className="select-box"
-              value={ticker}
-              onChange={(e) => setTicker(e.target.value)}
-            >
+            <select id="add-symbol" className="select-box" value={ticker} onChange={(e) => setTicker(e.target.value)}>
               {Object.keys(symbolConfigs).map((sym) => (
                 <option key={sym} value={sym}>
                   {sym}
@@ -59,10 +46,7 @@ export default function AddDummyOrders({
         </div>
 
         <div style={{ minWidth: 150, marginRight: 20 }}>
-          <p
-            className="text-muted"
-            style={{ marginBottom: 5, marginTop: 0, fontSize: "1rem" }}
-          >
+          <p className="text-muted" style={{ marginBottom: 5, marginTop: 0, fontSize: "1rem" }}>
             Diferencia Promedio
           </p>
 

@@ -9,25 +9,22 @@ import { useAppStore } from "./viewmodels/store";
 import "./App.css";
 
 function App() {
-	const account = useAppStore((st) => st.account);
-	const setNewBalance = useAppStore((st) => st.updateBalance);
+  const account = useAppStore((st) => st.account);
+  const setNewBalance = useAppStore((st) => st.updateBalance);
 
-	return (
-		<div className="container">
-			<div className="dashboard-grid">
-				<div>
-					<Header />
-					<MetricsSummary />
-					<AccountConfig
-						balance={account.balance}
-						setNewBalance={setNewBalance}
-					/>
-				</div>
-				<SymbolsConfig />
-			</div>
-			<OrdersTable />
-		</div>
-	);
+  return (
+    <div className="container">
+      <div className="dashboard-grid">
+        <div>
+          <Header />
+          <MetricsSummary />
+          <AccountConfig balance={account.balance} setNewBalance={setNewBalance} />
+        </div>
+        <SymbolsConfig />
+      </div>
+      <OrdersTable />
+    </div>
+  );
 }
 
 export default App;

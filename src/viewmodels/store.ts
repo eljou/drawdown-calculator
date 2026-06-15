@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import {
   addEstimatedOrders,
+  addOrder,
   getOrderResume,
   type MarketSymbol,
   type Order,
@@ -10,30 +11,69 @@ import {
 } from "../domain";
 import { type Account, createAccount } from "../domain/";
 
-type StoreSymbol = MarketSymbol & {
+export type StoreSymbol = MarketSymbol & {
   min: number;
   max: number;
-  colorClass: string;
+  color: string;
 };
+export type SymbolConfigs = Record<string, StoreSymbol>;
 
 export type AppStore = {
   account: Account;
   orders: ResumedOrder[];
-  symbolConfigs: Record<string, StoreSymbol>;
-  addSymbol: (symbol: StoreSymbol) => void;
+  symbolConfigs: SymbolConfigs;
   updateBalance: (newBalance: number) => void;
-  updateSymbolParams: (symbol: MarketSymbol) => void;
   setUpOrders: (orders: Order[]) => void;
   addOrder: (order: Order) => void;
   removeOrder: (id: string) => void;
-  addEstimatedOrders: (
-    symbol: MarketSymbol["ticker"],
-    mult: number,
-    baseDiff: number,
-    lots: number,
-  ) => void;
+  addEstimatedOrders: (symbol: MarketSymbol["ticker"], mult: number, baseDiff: number, lots: number) => void;
+  addSymbol: (symbol: StoreSymbol) => void;
+  updateSymbolParams: (symbol: StoreSymbol) => void;
+  removeSymbol: (ticker: string) => void;
 };
 
+const getOrderSymbol = (order: Order, symbolConfigs: SymbolConfigs) => symbolConfigs[order.symbol];
+
+const addNewOrder = (order: Order) => (orders: ResumedOrder[], symConfigs: SymbolConfigs) =>
+  addOrder(order, getOrderSymbol(order, symConfigs), orders);
+const setUpActualOrders = (newOrders: Order[]) => (orders: ResumedOrder[], symConfigs: SymbolConfigs) => [
+  ...orders,
+  ...newOrders.map((o) => getOrderResume(o, getOrderSymbol(o, symConfigs))),
+];
+
+const updateOrders = (updateFn: (st: AppStore) => ResumedOrder[]) => (st: AppStore) => {
+  const symConfigs = st.symbolConfigs;
+  const updatedOrders = updateFn(st);
+
+  return {
+    account: updateAccountEquityAndPnL(st.account, updatedOrders, symConfigs),
+    orders: updatedOrders,
+  };
+};
+
+const addOrUpdateSymbol =
+  (symbol: StoreSymbol) =>
+  ({ symbolConfigs }: AppStore) => ({ ...symbolConfigs, [symbol.ticker]: symbol });
+
+const removeSymbol =
+  (ticker: string) =>
+  ({ symbolConfigs }: AppStore) =>
+    Object.keys(symbolConfigs)
+      .filter((t) => t !== ticker)
+      .reduce<SymbolConfigs>((acc, t) => ({ ...acc, [t]: symbolConfigs[t] }), {});
+
+const updateSymbols = (updateFn: (st: AppStore) => SymbolConfigs) => (st: AppStore) => {
+  const symbolConfigs = updateFn(st);
+  const orders = st.orders.map((o) => getOrderResume(o, symbolConfigs[o.symbol]));
+
+  return {
+    account: updateAccountEquityAndPnL(st.account, orders, symbolConfigs),
+    symbolConfigs,
+    orders,
+  };
+};
+
+// TODO: update all state changin methods to void repeating logic
 export const useAppStore = create<AppStore>((set) => ({
   account: createAccount(1000),
   orders: [],
@@ -45,7 +85,7 @@ export const useAppStore = create<AppStore>((set) => ({
       shortsStop: 70000,
       min: 20000,
       max: 120000,
-      colorClass: "text-orange",
+      color: "orange",
     },
     ETHUSD: {
       ticker: "ETHUSD",
@@ -54,110 +94,31 @@ export const useAppStore = create<AppStore>((set) => ({
       shortsStop: 2500,
       min: 100,
       max: 7000,
-      colorClass: "text-magenta",
+      color: "#ff52ff",
     },
   },
 
-  addSymbol: (symbol) =>
+  updateBalance: (newBalance) =>
     set((st) => ({
-      symbolConfigs: { ...st.symbolConfigs, [symbol.ticker]: symbol },
+      account: updateAccountEquityAndPnL(createAccount(newBalance), st.orders, st.symbolConfigs),
     })),
 
-  updateBalance: (newBalance: number) =>
-    set((st) => ({
-      account: updateAccountEquityAndPnL(
-        createAccount(newBalance),
-        st.orders,
-        st.symbolConfigs,
-      ),
-    })),
+  setUpOrders: (xs) => set(updateOrders(({ orders, symbolConfigs }) => setUpActualOrders(xs)(orders, symbolConfigs))),
 
-  setUpOrders: (orders: Order[]) =>
-    set((st) => {
-      const updatedOrders = orders.map((o) =>
-        getOrderResume(o, st.symbolConfigs[o.symbol]),
-      );
+  addOrder: (x) => set(updateOrders(({ orders, symbolConfigs }) => addNewOrder(x)(orders, symbolConfigs))),
 
-      return {
-        account: updateAccountEquityAndPnL(
-          st.account,
-          updatedOrders,
-          st.symbolConfigs,
-        ),
-        orders: updatedOrders,
-      };
-    }),
-
-  addOrder: (order: Order) =>
-    set((st) => {
-      const updatedOrders = [
-        getOrderResume(order, st.symbolConfigs[order.symbol]),
-        ...st.orders,
-      ];
-
-      return {
-        account: updateAccountEquityAndPnL(
-          st.account,
-          updatedOrders,
-          st.symbolConfigs,
-        ),
-        orders: updatedOrders,
-      };
-    }),
-
-  removeOrder: (id: string) =>
-    set((st) => {
-      const updatedOrders = removeOrder(id, st.orders);
-      return {
-        account: updateAccountEquityAndPnL(
-          st.account,
-          updatedOrders,
-          st.symbolConfigs,
-        ),
-        orders: updatedOrders,
-      };
-    }),
-
-  updateSymbolParams: (symbol: MarketSymbol) =>
-    set((st) => {
-      const symbolToUpdate = st.symbolConfigs[symbol.ticker];
-
-      const newSymbolConfigs = {
-        ...st.symbolConfigs,
-        [symbol.ticker]: { ...symbolToUpdate, ...symbol },
-      };
-
-      const updatedOrders = st.orders.map((o) =>
-        getOrderResume(o, newSymbolConfigs[o.symbol]),
-      );
-
-      return {
-        account: updateAccountEquityAndPnL(
-          st.account,
-          updatedOrders,
-          newSymbolConfigs,
-        ),
-        symbolConfigs: newSymbolConfigs,
-        orders: updatedOrders,
-      };
-    }),
+  removeOrder: (id) => set(updateOrders(({ orders }) => removeOrder(id, orders))),
 
   addEstimatedOrders: (symbol, mult, avgDelta, lots) =>
-    set((st) => {
-      const newOrders = addEstimatedOrders(
-        st.orders,
-        st.symbolConfigs[symbol],
-        avgDelta * mult,
-        lots,
-      );
+    set(
+      updateOrders(({ orders, symbolConfigs }) =>
+        addEstimatedOrders(orders, symbolConfigs[symbol], avgDelta * mult, lots),
+      ),
+    ),
 
-      return {
-        account: updateAccountEquityAndPnL(
-          st.account,
-          newOrders,
-          st.symbolConfigs,
-        ),
-        orders: newOrders,
-      };
-    }),
+  addSymbol: (symbol) => set(updateSymbols(addOrUpdateSymbol(symbol))),
+
+  updateSymbolParams: (updatedSymbol) => set(updateSymbols(addOrUpdateSymbol(updatedSymbol))),
+
+  removeSymbol: (ticker) => set(updateSymbols(removeSymbol(ticker))),
 }));

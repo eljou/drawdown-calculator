@@ -2,10 +2,7 @@ import { useState } from "react";
 import type { Order } from "../../domain";
 import "./add-order.css";
 
-export default function AddOrder(props: {
-  onAddOrder: (order: Order) => void;
-  validSymbols: string[];
-}) {
+export default function AddOrder(props: { onAddOrder: (order: Order) => void; validSymbols: string[] }) {
   const [openPrice, setOpenPrice] = useState("");
   const [lots, setLots] = useState("");
   const [symbol, setSymbol] = useState("BTCUSD");
@@ -40,12 +37,7 @@ export default function AddOrder(props: {
             <div className="form-group">
               <label htmlFor="symbol">Símbolo / Activo</label>
               <div className="input-wrapper">
-                <select
-                  id="symbol"
-                  className="select-box"
-                  value={symbol}
-                  onChange={(e) => setSymbol(e.target.value)}
-                >
+                <select id="symbol" className="select-box" value={symbol} onChange={(e) => setSymbol(e.target.value)}>
                   {props.validSymbols.map((sym) => (
                     <option key={sym} value={sym}>
                       {sym}

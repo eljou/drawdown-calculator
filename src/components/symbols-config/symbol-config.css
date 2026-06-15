@@ -1,152 +1,170 @@
 .column-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  .head {
     display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
 
-    .head {
-        display: flex;
-        justify-content: space-between;
-        border-bottom: 1px solid var(--border-color);
-
-        span {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--accent-primary);
-            letter-spacing: 0.05em;
-        }
+    span {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      letter-spacing: 0.05em;
     }
+  }
 }
 
 .longs-wrapper {
-    border-left: 3px solid var(--crypto-green);
-    padding-left: 0.75rem;
+  border-left: 3px solid var(--crypto-green);
+  padding-left: 0.75rem;
 }
 
 .shorts-wrapper {
-    border-left: 3px solid var(--crypto-red);
-    padding-left: 0.75rem;
-}
-
-.subtitles {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-bottom: 0.25rem;
+  border-left: 3px solid var(--crypto-red);
+  padding-left: 0.75rem;
 }
 
 /* Ticker Premium Card Primitive Container */
 .ticker-preview-card {
-    padding: 0.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    width: 100%;
+  padding: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
 }
 
 /* Card Title Badge Bar Header */
 .ticker-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .ticker-badge {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: var(--accent-primary);
-    letter-spacing: 0.05em;
-    background-color: var(--bg-main);
-    padding: 0.25rem 0.55rem;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--accent-primary);
+  letter-spacing: 0.05em;
+  background-color: var(--bg-main);
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
 }
 
 .ticker-live-status {
-    display: flex;
-    align-items: center;
-    gap: 0.37rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.37rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
 }
 
 .status-dot {
-    width: 6px;
-    height: 6px;
-    background-color: var(--accent-primary);
-    border-radius: 50%;
+  width: 6px;
+  height: 6px;
+  background-color: var(--accent-primary);
+  border-radius: 50%;
 }
 
 .ticker-card-divider {
-    height: 1px;
-    background: linear-gradient(
-        90deg,
-        var(--border-color) 0%,
-        transparent 100%
-    );
-    width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-color) 0%, transparent 100%);
+  width: 100%;
 }
 
 /* Metric Alignment Structure Rows */
 .ticker-metrics-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.325rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.325rem;
 }
 
 .metric-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.2rem 0.75rem;
-    border-radius: 6px;
-    background-color: rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.2rem 0.75rem;
+  border-radius: 6px;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .metric-label {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 .metric-value {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--text-main);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
 }
 
 /* Dynamic Left Indicator Colors */
 .current-price-row {
-    border-left: 3px solid var(--accent-primary);
+  border-left: 3px solid var(--accent-primary);
 }
 
 .long-limit-row {
-    border-left: 3px solid var(--crypto-green);
+  border-left: 3px solid var(--crypto-green);
 }
 
 .short-limit-row {
-    border-left: 3px solid var(--crypto-red);
+  border-left: 3px solid var(--crypto-red);
 }
 
 /* Explicit text color overlays */
 .long-text {
-    color: var(--crypto-green);
+  color: var(--crypto-green);
 }
 
 .short-text {
-    color: var(--crypto-red);
+  color: var(--crypto-red);
 }
 
 /* Blinking heart-beat style animation utility for execution feeds */
 @keyframes pulse {
-    0%,
-    100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.4;
-    }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 .animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 1. Target the root input wrapper */
+input[type="color"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 30px;
+  height: 30px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+/* 2. Target the inner swatch container for Chrome, Safari, and Edge */
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: 2px solid #ccc;
+  border-radius: 50%;
+}
+
+/* 3. Target the inner swatch container for Firefox */
+input[type="color"]::-moz-color-swatch {
+  border: 2px solid #ccc;
+  border-radius: 50%;
 }
